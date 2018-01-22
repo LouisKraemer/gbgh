@@ -1,4 +1,4 @@
 *node_modules
-/front/node_modules
-/front/.idea
 .idea
+/front/.idea
+/front/node_modules
