@@ -1,17 +1,16 @@
 d3.json("data/json/map.json", function (json) {
     console.log(json)
 
-    //    var margin = {
-    //            top: '20px',
-    //            bottom: '20px',
-    //            left: '20px',
-    //            right: '20px'
-    //        },
-    //        width = windows,
-    //        height = 580,
-    //        scale = (width - 1) / Math.PI;
-    //
-    var svg = d3.select("body")
+    var margin = {
+            top: '20px',
+            bottom: '20px',
+            left: '20px',
+            right: '20px'
+        },
+//        width = windows,
+//        height = 580,
+        scale = (width - 1) / Math.PI,
+        svg = d3.select("body")
         .append("svg")
         .attr('class', 'map-container');
     //            .attr("width", width)
@@ -20,8 +19,11 @@ d3.json("data/json/map.json", function (json) {
     //    var tooltip = d3.select('body').append('div')
     //        .attr('class', 'hidden tooltip');
     //
+
+
+
     var center = d3.geoCentroid(json);
-    
+
     console.log((center))
     //
     var projection = d3.geoConicConformal()
@@ -32,14 +34,14 @@ d3.json("data/json/map.json", function (json) {
     var path = d3.geoPath()
         .projection(projection);
 
-    //    var bounds = path.bounds(json);
-    //    var hscale = scale * width / (bounds[1][0] - bounds[0][0]);
-    //    var vscale = scale * height / (bounds[1][1] - bounds[0][1]);
-    //    var scale = (hscale < vscale) ? hscale : vscale;
-    //    var offset = [width - (bounds[0][0] + bounds[1][0]) / 2,
-    //                            height - (bounds[0][1] + bounds[1][1]) / 2];
-    //
-    //    projection.scale(scale).translate(offset);
+    var bounds = path.bounds(json);
+    var hscale = scale * width / (bounds[1][0] - bounds[0][0]);
+    var vscale = scale * height / (bounds[1][1] - bounds[0][1]);
+    var scale = (hscale < vscale) ? hscale : vscale;
+    var offset = [width - (bounds[0][0] + bounds[1][0]) / 2,
+                                height - (bounds[0][1] + bounds[1][1]) / 2];
+
+    projection.scale(scale).translate(offset);
 
     svg.selectAll("path")
         .data(json.features)
