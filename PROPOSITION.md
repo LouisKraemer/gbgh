@@ -1,2 +1,2 @@
 
-![alt text](assets/proposition.png "Final proposal")
+![alt text](assets/proposition.jpg "Final proposal")
