@@ -47,6 +47,24 @@ d3.json("data/json/map.json", function (json) {
         }
     }
 
+    // Fill zone
+    d3.selectAll("path")
+        .style("fill", "#ccc")
+        .style("stroke", "#fff")
+        .style("stroke-linecap", "round")
+        .style("stroke-linejoin", "round")
+
+    var zoom = d3.zoom()
+        .scaleExtent([1, 8])
+        .on('zoom', zoomed);
+
+    svg.call(zoom);
+
+    function zoomed() {
+        svg.selectAll("path").style("stroke-width", 1.5 / d3.event.transform.k + "px");
+        svg.selectAll("path").attr("transform", d3.event.transform);
+    }
+
     //        width = parseInt(d3.select('#map').style('width')),
     //        width = width - margin.left - margin.right,
     //        mapRatio = .5,
