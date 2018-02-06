@@ -7,7 +7,7 @@ body {
     left: 0;
 }
 
-.map-container {
-    height: 70%;
-    width: 80%;
+#map-container {
+/*    height: 200px;*/
+    background-color: aqua
 }
