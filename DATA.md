@@ -7,7 +7,7 @@ Dans un premier temps, nous envisageons d'utiliser des données de ces deux sour
 
 ## Données Velo'v
 
-Ces données sont scrappées via une API HTTP exposée par le site opendatasoft. Le détail de cette api se trouve dans le lien suivant : [lien](https://public.opendatasoft.com/explore/dataset/station-velov-grand-lyon/api/?flg=fr)
+Ces données sont scrappées via une API HTTP exposée par le site opendatasoft. Le détail de cette api se trouve dans le lien suivant : [lien](https://public.opendatasoft.com/explore/dataset/station-velov-grand-lyon/api/?flg=fr).
 Du fait que ces données sont de l'opendata, nous pouvons les utiliser librement.
 
 Comme, pour l'instant, nous scrappons cette API sur une semaine avec une frequence d'un update par minute, nous allons générer au bout de la semaine 2688 Mb de données non nettoyées, qui seront par la suite preprocessées.
