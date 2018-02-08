@@ -62,8 +62,11 @@ d3.json("data/json/map.json", function (json) {
 
     function zoomed() {
         svg.selectAll("path").style("stroke-width", 1.5 / d3.event.transform.k + "px");
-        svg.selectAll("path").attr("transform", d3.event.transform);
+        svg.selectAll("path").transition().attr("transform", d3.event.transform);
     }
+
+    // Slider config
+
 
     //        width = parseInt(d3.select('#map').style('width')),
     //        width = width - margin.left - margin.right,
