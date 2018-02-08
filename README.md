@@ -3,6 +3,7 @@
 ## Objectifs
 
 Ce projet a pour but de montrer une potentielle corrélation entre la présence d'événements Facebook sur un lieu et la prise et le dépôt de Velo'v. 
+Il s'inscrit dans le cadre du cours de Visualisation interactives de données du cursus informatique de la troisième année de l'Ecole Centrale de Lyon.
 
 ## Installation
 
