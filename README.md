@@ -15,5 +15,4 @@ Le script start.sh permet de lancer le serveur afin de récupérer les données 
 
 ## Auteurs
 
-Creti Gabriel
-Kraemer Louis
+Creti Gabriel & Kraemer Louis
