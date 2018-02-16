@@ -53,16 +53,53 @@ d3.json("data/json/map.json", function (json) {
         .style("stroke", "#fff")
         .style("stroke-linecap", "round")
         .style("stroke-linejoin", "round")
+        .on('click', zoomOnClick)
+
+    var active = d3.select(null);
 
     var zoom = d3.zoom()
         .scaleExtent([1, 8])
         .on('zoom', zoomed);
 
-    svg.call(zoom);
+    function zoomOnClick(d) {
+        if (active.node() === this) {
+            return reset();
+        }
+
+        active.classed("active", false);
+        active = d3.select(this).classed("active", true);
+
+        var bounds = path.bounds(d),
+            dx = bounds[1][0] - bounds[0][0],
+            dy = bounds[1][1] - bounds[0][1],
+            x = (bounds[0][0] + bounds[1][0]) / 2,
+            y = (bounds[0][1] + bounds[1][1]) / 2,
+            scale = Math.max(1, Math.min(8, 0.9 / Math.max(dx / width, dy / height))),
+            translate = [width / 2 - scale * x, height / 2 - scale * y];
+
+        svg.transition()
+            .duration(750)
+            // .call(zoom.translate(translate).scale(scale).event); // not in d3 v4
+            .call(zoom.transform, d3.zoomIdentity.translate(translate[0], translate[1]).scale(scale))
+    }
+
+    function reset() {
+        active.classed("active", false);
+        active = d3.select(null);
+
+        svg.transition()
+            .duration(750)
+            // .call( zoom.transform, d3.zoomIdentity.translate(0, 0).scale(1) ); // not in d3 v4
+            .call(zoom.transform, d3.zoomIdentity);
+    }
+
+    //    svg.call(d3.zoom().on('zoom', function() {
+    //        svg.attr('transform', d3.event.transform)
+    //    }));
 
     function zoomed() {
         svg.selectAll("path").style("stroke-width", 1.5 / d3.event.transform.k + "px");
-        svg.selectAll("path").transition().attr("transform", d3.event.transform);
+        svg.selectAll("path").attr("transform", d3.event.transform);
     }
 
     // Slider config
