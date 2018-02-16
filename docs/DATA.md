@@ -13,7 +13,7 @@ Du fait que ces données sont de l'opendata, nous pouvons les utiliser librement
 Comme, pour l'instant, nous scrappons cette API sur une semaine avec une frequence d'un update par minute, nous allons générer au bout de la semaine 2688 Mb de données non nettoyées, qui seront par la suite preprocessées.
 Ce processus de scraping se terminera le jeudi 15/02.
 
-Le scrapping de ce dataset est fait avec un [script python](./getVelov.py) qui est executé via crontab. Ce script injecte les JSONs fournis par l'api web dans une base mongoDb. 
+Le scrapping de ce dataset est fait avec un [script python](../backend/getVelov.py) qui est executé via crontab. Ce script injecte les JSONs fournis par l'api web dans une base mongoDb. 
 
 ## Données event Facebook
 
@@ -21,5 +21,5 @@ Ces données sont scrappées de la partie publique de facebook. Pour ce faire, n
 Ce repositoire en node.js nous permet de créer une API HTTP en localhost qui permet d'interroger facebook sur des événements publiques autour d'une zone définie en paramètre dans la requête.
 
 Comme l'API précedente, celle-ci renvoie un JSON. le traitement est donc le même : 
-nous scrappons deux fois par jour tous les événements dans la ville de Lyon avec un [script python](./getEvent.py) qui est executé par un crontab également. Ensuite, les données sont injectées dans une base de données MongoDb.
+nous scrappons deux fois par jour tous les événements dans la ville de Lyon avec un [script python](./backend/getEvent.py) qui est executé par un crontab également. Ensuite, les données sont injectées dans une base de données MongoDb.
 
