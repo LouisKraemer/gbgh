@@ -139,6 +139,7 @@ d3.json("data/json/map.json", function (json) {
                 })
                 .attr('r', stationRadius)
                 .classed('hide', true)
+                .on('click', reset)
                 // .on('mouseover', function (d) {
                 //     const x = d3.mouse(this)[0];
                 //     const y = d3.mouse(this)[1];
