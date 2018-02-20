@@ -75,7 +75,7 @@ for feature in r.json()["features"]:
     toInsertStation['available_bike_stands'] = feature['properties']['available_bike_stands']
     stationArray.append(toInsertStation)
 
-toInsert = {'timestamp' : timestamp, "stations" : stationArray}
+toInsert = {'timestamp' : int(timestamp), "stations" : stationArray}
 result = db.dynamicVelov.insert_one(toInsert)
 
 logging.info("Inserted dynamic velovs with ID in database : %s" % result.inserted_id)
