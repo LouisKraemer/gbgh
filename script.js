@@ -8,7 +8,6 @@ d3.json("data/json/map.json", function (json) {
         center = d3.geoCentroid(json),
         width = parseInt(d3.select('#map').style('width')),
         projection = d3.geoConicConformal()
-        //        .translate([width / 2, height / 2])
         .center(center)
         .scale(initScale),
         path = d3.geoPath()
@@ -23,6 +22,12 @@ d3.json("data/json/map.json", function (json) {
     d3.select("#map").attr('height', height);
 
     projection.translate([width / 2, height / 2]);
+
+    svg.append('g').attr('id', 'velov-tooltip').classed('hide', true);
+
+    d3.select('#velov-tooltip').append('rect').classed('rect-tooltip', true)
+        .attr('height', 50)
+        .attr('width', 100);
 
     svg.selectAll("path")
         .data(json.features)
@@ -95,20 +100,21 @@ d3.json("data/json/map.json", function (json) {
             scale = Math.max(1, Math.min(8, 0.9 / Math.max(dx / width, dy / height))),
             translate = [width / 2 - scale * x, height / 2 - scale * y];
 
-        showStations(this, translate, scale);
+        showStations(this);
 
         svg.transition()
-            .duration(750)
+            .duration(duration)
             // .call(zoom.translate(translate).scale(scale).event); // not in d3 v4
             .call(zoom.transform, d3.zoomIdentity.translate(translate[0], translate[1]).scale(scale))
     }
 
     function reset() {
+        stations.classed('hide', true);
         active.classed("active", false);
         active = d3.select(null);
 
         svg.transition()
-            .duration(750)
+            .duration(duration)
             // .call( zoom.transform, d3.zoomIdentity.translate(0, 0).scale(1) ); // not in d3 v4
             .call(zoom.transform, d3.zoomIdentity);
     }
@@ -116,6 +122,7 @@ d3.json("data/json/map.json", function (json) {
     function zoomed() {
         svg.selectAll("path").style("stroke-width", 1.5 / d3.event.transform.k + "px");
         svg.selectAll("path").attr("transform", d3.event.transform);
+        svg.selectAll('circle').attr('r', stationRadius/d3.event.transform.k);
         svg.selectAll('circle').attr('transform', d3.event.transform);
     }
 
@@ -133,39 +140,30 @@ d3.json("data/json/map.json", function (json) {
                     return projection(d.geometry.coordinates)[1];
                 })
                 .attr('r', stationRadius)
-                // .attr('class', function (d) {
-                //     var result = 'no-location';
-                //     json.features.forEach(function (commune) {
-                //         if (d3.polygonContains(commune.geometry.coordinates[0], d.geometry.coordinates)) {
-                //             // console.log(typeof (commune.properties.insee ? commune.properties.insee : commune.properties.inseecommune))
-                //             result = 'loc-' + (commune.properties.insee ? commune.properties.insee : commune.properties.inseecommune);
-                //         }
-                //     });
-                //     return result;
-                // })
-                .classed('hide', true);
+                .classed('hide', true)
+                .on('mouseover', function (d) {
+                    const x = d3.mouse(this)[0];
+                    const y = d3.mouse(this)[1];
+                    d3.select('#velov-tooltip')
+                        .attr('x', x)
+                        .classed('hide', false);
+                })
+                .on('mouseleave', function () {
+                    d3.select('#velov-tooltip').classed('hide', true);
+                })
         });
     }
 
 
-    function showStations(region, translate, scale) {
-        stations.classed('hide', true)
-            // .attr('r', scale*stationRadius)
-            // .attr('cx', function (d) {
-            //     console.log(projection(d.geometry.coordinates)[0], translate[0])
-            //     return projection(d.geometry.coordinates)[0]
-            // })
+    function showStations(region) {
+        stations.classed('hide', true);
 
         const idRegion = d3.select(region).attr('id');
-        stations.classed('hide', function (d) {
-            return d.properties.code_insee !== idRegion;
-        })
-        // d3.selectAll('.loc-' + idRegion).classed('hide', false).translate(translate[0], translate[1]).scale(scale)
-        // stations.classed('hide', function (d) {
-        //     const point = d.geometry.coordinates;
-        //     // console.log(d3.geoContains(region, d.geometry.coordinates))
-        //     // console.log(d3.polygonContains(test, point))
-        // })
+        setTimeout(function () {
+            stations.classed('hide', function (d) {
+                return d.properties.code_insee !== idRegion;
+            })
+        }, duration)
     }
 
     // Slider config
