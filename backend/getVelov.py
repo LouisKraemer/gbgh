@@ -20,13 +20,17 @@ db.velovs.create_index('timestamp', unique=True)
 now=datetime.datetime.now()
 timestamp = now.strftime("%s")
 
-r = requests.get("https://public.opendatasoft.com/api/records/1.0/search/"
-   "?dataset=" + "station-velov-grand-lyon" + 
-   "&rows=" + "350")
+r = requests.get("https://download.data.grandlyon.com/wfs/rdata" +
+   "?SERVICE=WFS&VERSION=2.0.0" +
+   "&outputformat=GEOJSON" +
+   "&maxfeatures=30" +
+   "&request=GetFeature" +
+   "&typename=jcd_jcdecaux.jcdvelov" +
+   "&SRSNAME=urn:ogc:def:crs:EPSG::4171")
 
 logging.info("http request status code is : %s" % r.status_code)
 
-toInsert = {"timestamp" : timestamp, "data" : r.json()['records']}
+toInsert = {"timestamp" : timestamp, "geoJson" : r.json()}
 result = db.velovs.insert_one(toInsert)
 
 logging.info("Inserted ID in database : %s" % result.inserted_id)
