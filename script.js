@@ -23,11 +23,11 @@ d3.json("data/json/map.json", function (json) {
 
     projection.translate([width / 2, height / 2]);
 
-    svg.append('g').attr('id', 'velov-tooltip').classed('hide', true);
+    // svg.append('g').attr('id', 'velov-tooltip').classed('hide', true);
 
-    d3.select('#velov-tooltip').append('rect').classed('rect-tooltip', true)
-        .attr('height', 50)
-        .attr('width', 100);
+    // d3.select('#velov-tooltip').append('rect').classed('rect-tooltip', true)
+    //     .attr('height', 50)
+    //     .attr('width', 100);
 
     svg.selectAll("path")
         .data(json.features)
@@ -141,16 +141,16 @@ d3.json("data/json/map.json", function (json) {
                 })
                 .attr('r', stationRadius)
                 .classed('hide', true)
-                .on('mouseover', function (d) {
-                    const x = d3.mouse(this)[0];
-                    const y = d3.mouse(this)[1];
-                    d3.select('#velov-tooltip')
-                        .attr('x', x)
-                        .classed('hide', false);
-                })
-                .on('mouseleave', function () {
-                    d3.select('#velov-tooltip').classed('hide', true);
-                })
+                // .on('mouseover', function (d) {
+                //     const x = d3.mouse(this)[0];
+                //     const y = d3.mouse(this)[1];
+                //     d3.select('#velov-tooltip')
+                //         .attr('x', x)
+                //         .classed('hide', false);
+                // })
+                // .on('mouseleave', function () {
+                //     d3.select('#velov-tooltip').classed('hide', true);
+                // })
         });
     }
 
