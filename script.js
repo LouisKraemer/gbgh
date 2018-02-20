@@ -17,17 +17,16 @@ d3.json("data/json/map.json", function (json) {
         height = width / ratio,
         stations,
         duration = 750,
+        tooltipDuration = 250,
         stationRadius = 10;
 
     d3.select("#map").attr('height', height);
 
     projection.translate([width / 2, height / 2]);
 
-    // svg.append('g').attr('id', 'velov-tooltip').classed('hide', true);
+    svg.append('g').attr('id', 'velov-tooltip').classed('hide', true);
 
-    // d3.select('#velov-tooltip').append('rect').classed('rect-tooltip', true)
-    //     .attr('height', 50)
-    //     .attr('width', 100);
+    d3.select('#velov-tooltip').append('rect').classed('rect-tooltip', true);
 
     svg.selectAll("path")
         .data(json.features)
@@ -65,7 +64,6 @@ d3.json("data/json/map.json", function (json) {
                 .attr('cy', function (d) {
                     return projection(d.geometry.coordinates)[1];
                 })
-                .attr('r', )
 
         }
     }
