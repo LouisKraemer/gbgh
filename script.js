@@ -17,6 +17,7 @@ d3.json("data/json/map.json", function (json) {
         height = width / ratio,
         stations,
         duration = 750,
+        velovDuration = 250,
         tooltipDuration = 250,
         stationRadius = 10;
 
@@ -138,6 +139,7 @@ d3.json("data/json/map.json", function (json) {
                     return projection(d.geometry.coordinates)[1];
                 })
                 .attr('r', stationRadius)
+                .style('opacity', 0)
                 .classed('hide', true)
                 .on('click', reset)
                 // .on('mouseover', function (d) {
@@ -155,14 +157,23 @@ d3.json("data/json/map.json", function (json) {
 
 
     function showStations(region) {
-        stations.classed('hide', true);
+        // stations.classed('hide', true);
+        hideStation();
 
         const idRegion = d3.select(region).attr('id');
         setTimeout(function () {
             stations.classed('hide', function (d) {
                 return d.properties.code_insee !== idRegion;
             })
+                .transition().duration(velovDuration).style('opacity', 1);
         }, duration)
+    }
+
+    function hideStation() {
+        stations.transition().duration(velovDuration).style('opacity', 0);
+        setTimeout(function () {
+            stations.classed('hide', true);
+        }, velovDuration);
     }
 
     // Slider config
