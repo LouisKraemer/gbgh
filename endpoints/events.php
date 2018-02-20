@@ -1,4 +1,5 @@
 <?php
+header('Access-Control-Allow-Origin: *');
 include 'apisecret.php';
 
 if( !isset($_GET["timestamp"])) {
