@@ -1,12 +1,12 @@
-body {
+html, body {
+    height: 100%;
     margin: 0;
-    position: fixed;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
+}
+
+body {
     padding: 20px;
     background-color: #3F51B5;
+    overflow-y: auto;
 }
 
 #title {
@@ -15,6 +15,7 @@ body {
     font-weight: bold;
     color: white;
     margin-bottom: 20px;
+    padding: 20px;
 }
 
 .active {
