@@ -14,7 +14,7 @@ logging.basicConfig(level=logging.INFO,
                     filename='/tmp/getVelovs.log',
                     filemode='a')
 
-client = MongoClient("localhost:27017")
+client = MongoClient("mongodb://gcreti:gcreti@ds143388.mlab.com:43388/gbgh")
 db=client.gbgh
 
 now=datetime.datetime.now()
@@ -42,6 +42,7 @@ if "staticVelov" not in db.collection_names():
         toInsert = {}
         toInsert["idstation"] = station["properties"]["idstation"]
         toInsert["nom"] = station["properties"]["nom"]
+        toInsert["code_insee"] = station["properties"]["code_insee"]
         toInsert["nbbornettes"] = station["properties"]["nbbornettes"]
         toInsert["geometry"] = station["geometry"]
 

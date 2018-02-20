@@ -25,7 +25,7 @@ latLongArray = [[45.74267869027205,4.815984447486699],
    [45.71463858945306,4.822507579810917],
    [45.70960426216861,4.862676342017949]]
 
-client = MongoClient("localhost:27017")
+client = MongoClient("mongodb://gcreti:gcreti@ds143388.mlab.com:43388/gbgh")
 db=client.gbgh
 db.events.create_index("id", unique=True)
 
