@@ -41,7 +41,7 @@ d3.json("data/json/map.json", function (json) {
 
     initVelov();
 
-    resize();
+    // resize();
 
     d3.select(window).on('resize', resize);
 
@@ -152,6 +152,8 @@ d3.json("data/json/map.json", function (json) {
                 // .on('mouseleave', function () {
                 //     d3.select('#velov-tooltip').classed('hide', true);
                 // })
+
+            resize();
         });
     }
 
