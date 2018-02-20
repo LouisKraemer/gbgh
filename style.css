@@ -24,3 +24,11 @@ body {
 .active {
     fill: #D32F2F !important;
 }
+
+path {
+    transition: fill 750ms;
+}
+
+.hide {
+    display: none;
+}

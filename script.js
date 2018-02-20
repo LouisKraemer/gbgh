@@ -1,4 +1,5 @@
 d3.json("data/json/map.json", function (json) {
+
     var svg = d3.select("#map-container")
         .append("svg")
         .attr('id', 'map')
@@ -14,7 +15,10 @@ d3.json("data/json/map.json", function (json) {
         .projection(projection),
         bounds = path.bounds(json),
         ratio = (bounds[1][0] - bounds[0][0]) / (bounds[1][1] - bounds[0][1]),
-        height = width / ratio;
+        height = width / ratio,
+        stations,
+        duration = 750,
+        stationRadius = 10;
 
     d3.select("#map").attr('height', height);
 
@@ -24,7 +28,13 @@ d3.json("data/json/map.json", function (json) {
         .data(json.features)
         .enter()
         .append("path")
-        .attr("d", path);
+        .attr("d", path)
+        .classed('region', true)
+        .attr('id', function (d) {
+            return d.properties.insee ? d.properties.insee : d.properties.inseecommune;
+        });
+
+    initVelov();
 
     resize();
 
@@ -44,6 +54,14 @@ d3.json("data/json/map.json", function (json) {
 
             d3.selectAll("path").attr("d", path);
 
+            stations.attr('cx', function (d) {
+                return projection(d.geometry.coordinates)[0];
+            })
+                .attr('cy', function (d) {
+                    return projection(d.geometry.coordinates)[1];
+                })
+                .attr('r', )
+
         }
     }
 
@@ -53,7 +71,7 @@ d3.json("data/json/map.json", function (json) {
         .style("stroke", "#fff")
         .style("stroke-linecap", "round")
         .style("stroke-linejoin", "round")
-        .on('click', zoomOnClick)
+        .on('click', zoomOnClick);
 
     var active = d3.select(null);
 
@@ -77,6 +95,8 @@ d3.json("data/json/map.json", function (json) {
             scale = Math.max(1, Math.min(8, 0.9 / Math.max(dx / width, dy / height))),
             translate = [width / 2 - scale * x, height / 2 - scale * y];
 
+        showStations(this, translate, scale);
+
         svg.transition()
             .duration(750)
             // .call(zoom.translate(translate).scale(scale).event); // not in d3 v4
@@ -93,13 +113,59 @@ d3.json("data/json/map.json", function (json) {
             .call(zoom.transform, d3.zoomIdentity);
     }
 
-    //    svg.call(d3.zoom().on('zoom', function() {
-    //        svg.attr('transform', d3.event.transform)
-    //    }));
-
     function zoomed() {
         svg.selectAll("path").style("stroke-width", 1.5 / d3.event.transform.k + "px");
         svg.selectAll("path").attr("transform", d3.event.transform);
+        svg.selectAll('circle').attr('transform', d3.event.transform);
+    }
+
+    function initVelov() {
+        d3.json("data/json/json_reduit.json", function (err, data) {
+            stations = svg.selectAll("circle")
+                .data(data.geoJson.features)
+                .enter()
+                .append("circle");
+
+            stations.attr('cx', function (d) {
+                return projection(d.geometry.coordinates)[0];
+            })
+                .attr('cy', function (d) {
+                    return projection(d.geometry.coordinates)[1];
+                })
+                .attr('r', stationRadius)
+                // .attr('class', function (d) {
+                //     var result = 'no-location';
+                //     json.features.forEach(function (commune) {
+                //         if (d3.polygonContains(commune.geometry.coordinates[0], d.geometry.coordinates)) {
+                //             // console.log(typeof (commune.properties.insee ? commune.properties.insee : commune.properties.inseecommune))
+                //             result = 'loc-' + (commune.properties.insee ? commune.properties.insee : commune.properties.inseecommune);
+                //         }
+                //     });
+                //     return result;
+                // })
+                .classed('hide', true);
+        });
+    }
+
+
+    function showStations(region, translate, scale) {
+        stations.classed('hide', true)
+            // .attr('r', scale*stationRadius)
+            // .attr('cx', function (d) {
+            //     console.log(projection(d.geometry.coordinates)[0], translate[0])
+            //     return projection(d.geometry.coordinates)[0]
+            // })
+
+        const idRegion = d3.select(region).attr('id');
+        stations.classed('hide', function (d) {
+            return d.properties.code_insee !== idRegion;
+        })
+        // d3.selectAll('.loc-' + idRegion).classed('hide', false).translate(translate[0], translate[1]).scale(scale)
+        // stations.classed('hide', function (d) {
+        //     const point = d.geometry.coordinates;
+        //     // console.log(d3.geoContains(region, d.geometry.coordinates))
+        //     // console.log(d3.polygonContains(test, point))
+        // })
     }
 
     // Slider config
