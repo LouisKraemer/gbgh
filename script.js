@@ -23,11 +23,9 @@ d3.json("data/json/map.json", function (json) {
 
     d3.select("#map").attr('height', height);
 
+    var tooltip = d3.select('body').append('div').classed('hide', true).classed('station-tooltip', true);
+
     projection.translate([width / 2, height / 2]);
-
-    svg.append('g').attr('id', 'velov-tooltip').classed('hide', true);
-
-    d3.select('#velov-tooltip').append('rect').classed('rect-tooltip', true);
 
     svg.selectAll("path")
         .data(json.features)
@@ -39,7 +37,7 @@ d3.json("data/json/map.json", function (json) {
             return d.properties.insee ? d.properties.insee : d.properties.inseecommune;
         });
 
-    initVelov();
+    init();
 
     d3.select(window).on('resize', resize);
 
@@ -123,7 +121,7 @@ d3.json("data/json/map.json", function (json) {
         svg.selectAll('circle').attr('transform', d3.event.transform);
     }
 
-    function initVelov() {
+    function init() {
         d3.json("data/json/json_reduit.json", function (err, data) {
             stations = svg.selectAll("circle")
                 .data(data.geoJson.features)
@@ -140,16 +138,17 @@ d3.json("data/json/map.json", function (json) {
                 .style('opacity', 0)
                 .classed('hide', true)
                 .on('click', reset)
-                // .on('mouseover', function (d) {
-                //     const x = d3.mouse(this)[0];
-                //     const y = d3.mouse(this)[1];
-                //     d3.select('#velov-tooltip')
-                //         .attr('x', x)
-                //         .classed('hide', false);
-                // })
-                // .on('mouseleave', function () {
-                //     d3.select('#velov-tooltip').classed('hide', true);
-                // })
+                .on('mousemove', function (d) {
+                    var mouse = d3.mouse(svg.node()).map(function (d) {
+                        return parseInt(d);
+                    });
+                    tooltip.html(d.properties.name)
+                        .classed('hide', false)
+                        .attr('style', 'left:' + (mouse[0] - 15) + 'px; top:' + (mouse[1] - 25) + 'px');
+                })
+                .on('mouseleave', function () {
+                    tooltip.classed('hide', true);
+                });
 
             resize();
         });
@@ -179,10 +178,6 @@ d3.json("data/json/map.json", function (json) {
     // d3.json('http://creti.fr/gbgh/endpoints/staticvelov.php', function (test) {
     //     console.log(test)
     // })
-
-    d3.json('http://creti.fr/gbgh/endpoints/staticvelov.php', function (test) {
-        console.log(test)
-    })
 
     // Slider config
 });

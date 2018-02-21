@@ -30,6 +30,14 @@ path {
     display: none;
 }
 
-.rect-tooltip {
-
+.station-tooltip {
+    background-color: #424242;
+    color: white;
+    position: absolute;
+    z-index: 9000;
+    font-size: 14px;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+    padding: 6px 8px;
 }
