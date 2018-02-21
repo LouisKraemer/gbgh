@@ -12,7 +12,7 @@ else {
     exit;
   }
   else {
-    $date = date('Y-m-d\TH:i:sO', $_GET["timestamp"]);
+    $date = date('Y-m-d\TH:i:sO', (int)$_GET["timestamp"]);
     $json = file_get_contents(
       "https://api.mlab.com/api/1/databases/gbgh/collections/events".
       "?apiKey=".$key.

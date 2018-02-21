@@ -123,6 +123,8 @@ d3.json("data/json/map.json", function (json) {
     }
 
     function init() {
+        
+
         d3.json("http://creti.fr/gbgh/endpoints/staticvelov.php", function (err, data) {
             stations = svg.selectAll("circle")
                 .data(data)
@@ -186,6 +188,18 @@ d3.json("data/json/map.json", function (json) {
             stations.classed('hide', true);
         }, velovDuration);
     }
+    
+    function fetchEvents(date) {
+        const timestamp = date.getTime();
+        const url = "http://creti.fr/gbgh/endpoints/events.php?timestamp=" + timestamp;
+        console.log(url)
+        d3.json(url, function (err, data) {
+            console.log(err)
+            console.log(data)
+        });
+    }
+
+    fetchEvents(new Date())
 
     // Slider config
 });
