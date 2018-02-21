@@ -105,6 +105,7 @@ d3.json("data/json/map.json", function (json) {
 
     function reset() {
         stations.classed('hide', true);
+        tooltip.classed('hide', true);
         active.classed("active", false);
         active = d3.select(null);
 
@@ -122,9 +123,9 @@ d3.json("data/json/map.json", function (json) {
     }
 
     function init() {
-        d3.json("data/json/json_reduit.json", function (err, data) {
+        d3.json("http://creti.fr/gbgh/endpoints/staticvelov.php", function (err, data) {
             stations = svg.selectAll("circle")
-                .data(data.geoJson.features)
+                .data(data)
                 .enter()
                 .append("circle");
 
@@ -134,6 +135,9 @@ d3.json("data/json/map.json", function (json) {
                 .attr('cy', function (d) {
                     return projection(d.geometry.coordinates)[1];
                 })
+                .attr('id', function (d) {
+                    return d.idStation;
+                })
                 .attr('r', stationRadius)
                 .style('opacity', 0)
                 .classed('hide', true)
@@ -142,27 +146,35 @@ d3.json("data/json/map.json", function (json) {
                     var mouse = d3.mouse(svg.node()).map(function (d) {
                         return parseInt(d);
                     });
-                    tooltip.html(d.properties.name)
+                    tooltip.html(d.nom)
                         .classed('hide', false)
-                        .attr('style', 'left:' + (mouse[0] - 15) + 'px; top:' + (mouse[1] - 25) + 'px');
+                        .attr('style', 'left:' + (mouse[0] + 15) + 'px; top:' + (mouse[1] - 25) + 'px');
                 })
                 .on('mouseleave', function () {
                     tooltip.classed('hide', true);
                 });
 
             resize();
+
+            d3.select('#loader-container')
+                .transition()
+                .duration(250)
+                .style('opacity', 0);
+
+            setTimeout(function () {
+                d3.select('#loader-container').classed('hide', true);
+            }, 250);
         });
     }
 
 
     function showStations(region) {
-        // stations.classed('hide', true);
         hideStation();
 
         const idRegion = d3.select(region).attr('id');
         setTimeout(function () {
             stations.classed('hide', function (d) {
-                return d.properties.code_insee !== idRegion;
+                return d.code_insee !== idRegion;
             })
                 .transition().duration(velovDuration).style('opacity', 1);
         }, duration)
@@ -174,10 +186,6 @@ d3.json("data/json/map.json", function (json) {
             stations.classed('hide', true);
         }, velovDuration);
     }
-
-    // d3.json('http://creti.fr/gbgh/endpoints/staticvelov.php', function (test) {
-    //     console.log(test)
-    // })
 
     // Slider config
 });
