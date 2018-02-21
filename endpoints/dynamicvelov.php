@@ -16,7 +16,8 @@ else {
       "https://api.mlab.com/api/1/databases/gbgh/collections/dynamicVelov".
       "?apiKey=".$key.
       "&q=".urlencode("{timestamp : {\$gt : ".$_GET['from'].", \$lt : ".$_GET['until']."}}").
-      "&f=".urlencode("{'_id':0}")
+      "&f=".urlencode("{'_id':0}").
+      "&l=60"
     );
     echo($json);
     exit;
