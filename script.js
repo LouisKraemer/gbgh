@@ -16,7 +16,7 @@ d3.json("data/json/map.json", function (json) {
         ratio = (bounds[1][0] - bounds[0][0]) / (bounds[1][1] - bounds[0][1]),
         height = width / ratio,
         stations,
-        events,
+        events = d3.select(null),
         duration = 750,
         velovDuration = 250,
         tooltipDuration = 250,
@@ -65,12 +65,12 @@ d3.json("data/json/map.json", function (json) {
                     return projection(d.geometry.coordinates)[1];
                 });
 
-            events.attr('x', function (e) {
-                return projection([e.place.location.longitude, e.place.location.latitude])[0]
-            })
-                .attr('y', function (e) {
-                    return projection([e.place.location.longitude, e.place.location.latitude])[1]
-                })
+            // events.attr('x', function (e) {
+            //     return projection([e.place.location.longitude, e.place.location.latitude])[0]
+            // })
+            //     .attr('y', function (e) {
+            //         return projection([e.place.location.longitude, e.place.location.latitude])[1]
+            //     })
 
         }
     }
@@ -169,43 +169,22 @@ d3.json("data/json/map.json", function (json) {
                     tooltip.classed('hide', true);
                 });
 
-            // Init date on slider here
+            fetchEvents(new Date("2018-02-20T20:00:00+0100"))
 
-            const initDate = new Date("2018-02-20T20:00:00+0100");
-            const timestamp = Math.floor(initDate.getTime() / 1000);
-            const url = "http://creti.fr/gbgh/endpoints/events.php?timestamp=" + timestamp;
-            d3.json(url, function (err, data) {
-                events = svg.selectAll('image')
-                    .data(data)
-                    .enter()
-                    .append('svg:image')
-                    .attr("xlink:href", "data/fb-logo.png");
+            setTimeout(function () {
+                fetchEvents(new Date("2018-02-21T20:00:00+0100"))
+            }, 5000)
 
-                events.attr('x', function (e) {
-                    return projection([e.place.location.longitude, e.place.location.latitude])[0]
-                })
-                    .attr('y', function (e) {
-                        return projection([e.place.location.longitude, e.place.location.latitude])[1]
-                    })
-                    .attr('height', eventHeight)
-                    .attr('width', eventWidth)
-                    .style('fill', '#3b5998')
-                    .on('click', function (d) {
-                        showEventInfo(d);
-                    });
+            resize();
 
-                resize();
+            d3.select('#loader-container')
+                .transition()
+                .duration(250)
+                .style('opacity', 0);
 
-                d3.select('#loader-container')
-                    .transition()
-                    .duration(250)
-                    .style('opacity', 0);
-
-                setTimeout(function () {
-                    d3.select('#loader-container').classed('hide', true);
-                }, 250);
-
-            });
+            setTimeout(function () {
+                d3.select('#loader-container').classed('hide', true);
+            }, 250);
         });
     }
 
@@ -233,11 +212,15 @@ d3.json("data/json/map.json", function (json) {
         const startTime = new Date(e.startTime);
         const formatStart = startTime.getDate() + '/'
             + (startTime.getMonth() < 9 ? '0' : '') + (startTime.getMonth() + 1) + '/'
-            + startTime.getFullYear() + ' - ' + startTime.getHours() + 'h' + startTime.getMinutes();
+            + startTime.getFullYear() + ' - '
+            + (startTime.getHours() < 10 ? '0' : '') + startTime.getHours() + 'h'
+            + (startTime.getMinutes() < 10 ? '0' : '') + startTime.getMinutes();
         const endTime = new Date(e.endTime);
         const formatEnd = endTime.getDate() + '/'
             + (endTime.getMonth() < 9 ? '0' : '') + (endTime.getMonth() + 1) + '/'
-            + endTime.getFullYear() + ' - ' + endTime.getHours() + 'h' + endTime.getMinutes();
+            + endTime.getFullYear() + ' - '
+            + (endTime.getHours() < 10 ? '0' : '') + endTime.getHours() + 'h'
+            + (endTime.getMinutes() < 10 ? '0' : '') + endTime.getMinutes();
         d3.select('#eventName').html(e.name);
         d3.select('#eventPlace').html(e.place.name);
         d3.select('#eventStartTime').html(formatStart);
@@ -245,13 +228,29 @@ d3.json("data/json/map.json", function (json) {
     }
 
     function fetchEvents(date) {
-        const timestamp = Math.floor(date.getTime() / 1000);
+        const timestamp = Math.floor(new Date(date).getTime() / 1000);
         const url = "http://creti.fr/gbgh/endpoints/events.php?timestamp=" + timestamp;
-        console.log(url);
         d3.json(url, function (err, data) {
-            console.log(err);
-            console.log(data);
-        });
+            events.remove();
+            events = svg.selectAll('image')
+                .data(data)
+                .enter()
+                .append('svg:image')
+                .attr("xlink:href", "data/fb-logo.png");
+
+            events.attr('x', function (e) {
+                return projection([e.place.location.longitude, e.place.location.latitude])[0]
+            })
+                .attr('y', function (e) {
+                    return projection([e.place.location.longitude, e.place.location.latitude])[1]
+                })
+                .attr('height', eventHeight)
+                .attr('width', eventWidth)
+                .style('fill', '#3b5998')
+                .on('click', function (d) {
+                    showEventInfo(d);
+                });
+        })
     }
 
     // fetchEvents(new Date("2018-02-20T20:00:00+0100"))
