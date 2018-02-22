@@ -16,10 +16,13 @@ d3.json("data/json/map.json", function (json) {
         ratio = (bounds[1][0] - bounds[0][0]) / (bounds[1][1] - bounds[0][1]),
         height = width / ratio,
         stations,
+        events,
         duration = 750,
         velovDuration = 250,
         tooltipDuration = 250,
-        stationRadius = 8;
+        stationRadius = 8,
+        eventHeight = 30,
+        eventWidth = 30;
 
     d3.select("#map").attr('height', height);
 
@@ -60,6 +63,13 @@ d3.json("data/json/map.json", function (json) {
             })
                 .attr('cy', function (d) {
                     return projection(d.geometry.coordinates)[1];
+                });
+
+            events.attr('x', function (e) {
+                return projection([e.place.location.longitude, e.place.location.latitude])[0]
+            })
+                .attr('y', function (e) {
+                    return projection([e.place.location.longitude, e.place.location.latitude])[1]
                 })
 
         }
@@ -116,10 +126,13 @@ d3.json("data/json/map.json", function (json) {
     }
 
     function zoomed() {
-        svg.selectAll("path").style("stroke-width", 1.5 / d3.event.transform.k + "px");
-        svg.selectAll("path").attr("transform", d3.event.transform);
-        svg.selectAll('circle').attr('r', stationRadius/d3.event.transform.k);
-        svg.selectAll('circle').attr('transform', d3.event.transform);
+        svg.selectAll("path").style("stroke-width", 1.5 / d3.event.transform.k + "px")
+            .attr("transform", d3.event.transform);
+        svg.selectAll('circle').attr('r', stationRadius/d3.event.transform.k)
+            .attr('transform', d3.event.transform);
+        svg.selectAll('image').attr('transform', d3.event.transform)
+            .attr('height', eventHeight/d3.event.transform.k)
+            .attr('width', eventWidth/d3.event.transform.k);
     }
 
     function init() {
@@ -156,16 +169,43 @@ d3.json("data/json/map.json", function (json) {
                     tooltip.classed('hide', true);
                 });
 
-            resize();
+            // Init date on slider here
 
-            d3.select('#loader-container')
-                .transition()
-                .duration(250)
-                .style('opacity', 0);
+            const initDate = new Date("2018-02-20T20:00:00+0100");
+            const timestamp = Math.floor(initDate.getTime() / 1000);
+            const url = "http://creti.fr/gbgh/endpoints/events.php?timestamp=" + timestamp;
+            d3.json(url, function (err, data) {
+                events = svg.selectAll('image')
+                    .data(data)
+                    .enter()
+                    .append('svg:image')
+                    .attr("xlink:href", "data/fb-logo.png");
 
-            setTimeout(function () {
-                d3.select('#loader-container').classed('hide', true);
-            }, 250);
+                events.attr('x', function (e) {
+                    return projection([e.place.location.longitude, e.place.location.latitude])[0]
+                })
+                    .attr('y', function (e) {
+                        return projection([e.place.location.longitude, e.place.location.latitude])[1]
+                    })
+                    .attr('height', eventHeight)
+                    .attr('width', eventWidth)
+                    .style('fill', '#3b5998')
+                    .on('click', function (d) {
+                        showEventInfo(d);
+                    });
+
+                resize();
+
+                d3.select('#loader-container')
+                    .transition()
+                    .duration(250)
+                    .style('opacity', 0);
+
+                setTimeout(function () {
+                    d3.select('#loader-container').classed('hide', true);
+                }, 250);
+
+            });
         });
     }
 
@@ -188,18 +228,33 @@ d3.json("data/json/map.json", function (json) {
             stations.classed('hide', true);
         }, velovDuration);
     }
-    
+
+    function showEventInfo(e) {
+        const startTime = new Date(e.startTime);
+        const formatStart = startTime.getDate() + '/'
+            + (startTime.getMonth() < 9 ? '0' : '') + (startTime.getMonth() + 1) + '/'
+            + startTime.getFullYear() + ' - ' + startTime.getHours() + 'h' + startTime.getMinutes();
+        const endTime = new Date(e.endTime);
+        const formatEnd = endTime.getDate() + '/'
+            + (endTime.getMonth() < 9 ? '0' : '') + (endTime.getMonth() + 1) + '/'
+            + endTime.getFullYear() + ' - ' + endTime.getHours() + 'h' + endTime.getMinutes();
+        d3.select('#eventName').html(e.name);
+        d3.select('#eventPlace').html(e.place.name);
+        d3.select('#eventStartTime').html(formatStart);
+        d3.select('#eventEndTime').html(formatEnd);
+    }
+
     function fetchEvents(date) {
-        const timestamp = date.getTime();
+        const timestamp = Math.floor(date.getTime() / 1000);
         const url = "http://creti.fr/gbgh/endpoints/events.php?timestamp=" + timestamp;
-        console.log(url)
+        console.log(url);
         d3.json(url, function (err, data) {
-            console.log(err)
-            console.log(data)
+            console.log(err);
+            console.log(data);
         });
     }
 
-    fetchEvents(new Date())
+    // fetchEvents(new Date("2018-02-20T20:00:00+0100"))
 
     // Slider config
 });

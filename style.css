@@ -75,3 +75,7 @@ path {
     border-radius: 4px;
     padding: 6px 8px;
 }
+
+#event-info {
+    color: white;
+}
