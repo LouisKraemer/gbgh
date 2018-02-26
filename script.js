@@ -36,14 +36,17 @@ d3.json("data/json/map.json", function (json) {
         .attr('max', endDate)
         .attr('value', beginDate)
         .attr('step', 300)
-        .on('change', function () {
+        .on('input', function () {
             const date = new Date(+this.value * 1000);
             d3.select('#current-date').html(date.getDate() + '/'
                 + (date.getMonth() < 9 ? '0' : '') + (date.getMonth() + 1) + '/'
                 + date.getFullYear() + ' - '
                 + (date.getHours() < 10 ? '0' : '') + date.getHours() + 'h'
                 + (date.getMinutes() < 10 ? '0' : '') + date.getMinutes());
-            fetchEvents(+this.value);
+            // fetchEvents(+this.value);
+        })
+        .on('change', function() {
+          fetchEvents(+this.value);
         });
 
     var tooltip = d3.select('body').append('div').classed('hide', true).classed('station-tooltip', true);
@@ -164,7 +167,7 @@ d3.json("data/json/map.json", function (json) {
             + date.getFullYear() + ' - '
             + (date.getHours() < 10 ? '0' : '') + date.getHours() + 'h'
             + (date.getMinutes() < 10 ? '0' : '') + date.getMinutes());
-        
+
 
         d3.json("http://creti.fr/gbgh/endpoints/staticvelov.php", function (err, data) {
             stations = svg.selectAll("circle")
