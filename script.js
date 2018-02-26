@@ -26,17 +26,21 @@ d3.json("data/json/map.json", function (json) {
         beginDate = 1519208881,
         endDate = 1519645081,
         eventfetchState = false,
-        velovFetchState = true,
+        velovFetchState = false,
+        initFetchState = false,
         timeSlider = d3.select('#time-slider'),
         sliderLoader = d3.select('#slider-loader'),
-        transform = null;
+        transform = null,
+        timestampStored = [],
+        velovData = [],
+        step = 120;
 
     d3.select("#map").attr('height', height);
 
     timeSlider.attr('min', beginDate)
         .attr('max', endDate)
         .attr('value', beginDate)
-        .attr('step', 300)
+        .attr('step', step)
         .on('input', function () {
             const date = new Date(+this.value * 1000);
             d3.select('#current-date').html(date.getDate() + '/'
@@ -47,6 +51,7 @@ d3.json("data/json/map.json", function (json) {
         })
         .on('change', function() {
           fetchEvents(+this.value);
+          fetchVelov(+this.value);
         });
 
     var tooltip = d3.select('body').append('div').classed('hide', true).classed('station-tooltip', true);
@@ -152,7 +157,9 @@ d3.json("data/json/map.json", function (json) {
         transform = d3.event.transform;
         svg.selectAll("path").style("stroke-width", 1.5 / d3.event.transform.k + "px")
             .attr("transform", d3.event.transform);
-        svg.selectAll('circle').attr('r', stationRadius/d3.event.transform.k)
+        svg.selectAll('circle').attr('r', function (d) {
+            return getRadius(d.available_bikes, d.available_bike_stands, d3.event.transform);
+        })
             .attr('transform', d3.event.transform);
         svg.selectAll('image').attr('transform', d3.event.transform)
             .attr('height', eventHeight/d3.event.transform.k)
@@ -183,9 +190,19 @@ d3.json("data/json/map.json", function (json) {
                     return projection(d.geometry.coordinates)[1];
                 })
                 .attr('id', function (d) {
-                    return d.idStation;
+                    return 'station_' + d.idstation;
                 })
-                .attr('r', stationRadius)
+                .attr('data-region', function (d) {
+                    return d.code_insee;
+                })
+                .attr('name', function (d) {
+                    return d.nom;
+                })
+                .attr('r', function (d) {
+                    // d.available_bikes = 1;
+                    // d.available_bike_stands = 0;
+                    return getRadius(1, 0, transform);
+                })
                 .style('opacity', 0)
                 .classed('hide', true)
                 .on('click', reset)
@@ -193,7 +210,7 @@ d3.json("data/json/map.json", function (json) {
                     var mouse = d3.mouse(svg.node()).map(function (d) {
                         return parseInt(d);
                     });
-                    tooltip.html(d.nom)
+                    tooltip.html(d3.select(this).attr('name'))
                         .classed('hide', false)
                         .attr('style', 'left:' + (mouse[0] + 15) + 'px; top:' + (mouse[1] - 25) + 'px');
                 })
@@ -202,6 +219,8 @@ d3.json("data/json/map.json", function (json) {
                 });
 
             fetchEvents(beginDate);
+
+            fetchVelov(beginDate);
 
             resize();
 
@@ -223,7 +242,8 @@ d3.json("data/json/map.json", function (json) {
         const idRegion = d3.select(region).attr('id');
         setTimeout(function () {
             stations.classed('hide', function (d) {
-                return d.code_insee !== idRegion;
+                // return d.code_insee !== idRegion;
+                return d3.select(this).attr('data-region') !== idRegion;
             })
                 .transition().duration(velovDuration).style('opacity', 1);
         }, duration)
@@ -256,7 +276,7 @@ d3.json("data/json/map.json", function (json) {
     }
 
     function fetchEvents(timestamp) {
-        timeSlider.attr('disabled', false);
+        timeSlider.attr('disabled', true);
         sliderLoader.classed('hide', false);
         eventfetchState = false;
         const url = "http://creti.fr/gbgh/endpoints/events.php?timestamp=" + timestamp;
@@ -292,15 +312,94 @@ d3.json("data/json/map.json", function (json) {
         })
     }
 
-    // function fetchVelov(timestamp) {
-    //     timeSlider.attr('disbaled', false);
-    //     sliderLoader.classed('hide', false);
-    //     velovFetchState = false;
-    //     const url = "http://creti.fr/gbgh/endpoints/events.php?from=" + timestamp + '&until=';
-    //     d3.json(url, function (err, data) {
-    //         console.log(data)
-    //     })
-    // }
+    function fetchVelov(timestamp) {
+        var timestampToDownload = [];
+        for (var i = 0; i < 14; i++) {
+            const index = findTimestamp(parseInt(timestamp) + parseInt(i*step));
+            if (index === -1) {
+                timestampToDownload.push(parseInt(timestamp) + parseInt(i*step));
+            }
+        }
+        if (timestampToDownload.length > 0) {
+            timeSlider.attr('disabled', true);
+            sliderLoader.classed('hide', false);
+            velovFetchState = false;
+
+            const min = Math.min.apply(null, timestampToDownload) - 59,
+                max = Math.max.apply(null, timestampToDownload) + 59;
+
+            const url = "http://creti.fr/gbgh/endpoints/dynamicvelov.php?from=" + min + '&until=' + max;
+            d3.json(url, function (err, data) {
+                data.forEach(function (e) {
+                    if (timestampStored.indexOf(e.timestamp) === -1) {
+                        timestampStored.push(e.timestamp);
+                        velovData.push(e);
+                    }
+                });
+
+                updateVelov(timestamp);
+
+                velovFetchState = true;
+                checkFetchState();
+            })
+        } else {
+            updateVelov(timestamp);
+        }
+    }
+
+    function findTimestamp(timestamp) {
+        for(var i = 0; i<timestampStored.length; i++) {
+            if (timestamp > timestampStored[i] - 59 && timestamp < timestampStored[i] + 59) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    function updateVelov(timestamp) {
+        const index = findTimestamp(timestamp);
+        const updatedData = getVelovData(index);
+
+        svg.selectAll('circle').data(updatedData.stations)
+            .attr('r', function (d) {
+                return getRadius(d.available_bikes, d.available_bike_stands, transform);
+            })
+
+
+
+
+        // updatedData.stations.forEach(function (station) {
+        //     if(station.available_bike_stands === 0 && station.available_bikes === 0) {
+        //         d3.select('#station_' + station.idstation)
+        //             .classed('no-data', true);
+        //     } else {
+        //         d3.select('#station_' + station.idstation)
+        //             .classed('no-data', function () {
+        //                 return station.available_bike_stands === 0 && station.available_bikes === 0
+        //             })
+        //             .attr('r', function (d) {
+        //                 if (station.available_bike_stands === 0 && station.available_bikes === 0) {
+        //                     d.available_bikes = station.available_bikes;
+        //                     d.available_bike_stands = station.available_bike_stands;
+        //                     return transform ?
+        //                         parseInt(stationRadius*(d.available_bikes/d.available_bike_stands+d.available_bikes)/transform.k) :
+        //                         parseInt(stationRadius*(d.available_bikes/d.available_bike_stands+d.available_bikes));
+        //                 } else {
+        //                     return transform ? parseInt(stationRadius/transform.k) : stationRadius;
+        //                 }
+        //             })
+        //     }
+        // })
+
+    }
+
+    function getVelovData(index) {
+        for(var i = 0; i<velovData.length; i++) {
+            if (velovData[i].timestamp === timestampStored[index]) {
+                return velovData[i];
+            }
+        }
+    }
 
     function checkFetchState() {
         if (eventfetchState && velovFetchState) {
@@ -309,6 +408,13 @@ d3.json("data/json/map.json", function (json) {
         }
     }
 
+    function getRadius(available_bikes, available_bike_stands, transform) {
+        if(available_bikes === 0 && available_bike_stands === 0) {
+            return 0;
+        } else {
+            return parseInt((20*available_bikes/(available_bike_stands+available_bikes)/(transform ? transform.k : 1)).toString())
+        }
+    }
 
     // fetchEvents(new Date("2018-02-20T20:00:00+0100"))
 

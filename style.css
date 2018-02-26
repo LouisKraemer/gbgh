@@ -76,6 +76,10 @@ path {
     display: none !important;
 }
 
+.no-data {
+    fill: grey;
+}
+
 .station-tooltip {
     background-color: #424242;
     color: white;
