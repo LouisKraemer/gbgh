@@ -28,7 +28,8 @@ d3.json("data/json/map.json", function (json) {
         eventfetchState = false,
         velovFetchState = true,
         timeSlider = d3.select('#time-slider'),
-        sliderLoader = d3.select('#slider-loader');
+        sliderLoader = d3.select('#slider-loader'),
+        transform = null;
 
     d3.select("#map").attr('height', height);
 
@@ -149,6 +150,7 @@ d3.json("data/json/map.json", function (json) {
     }
 
     function zoomed() {
+        transform = d3.event.transform;
         svg.selectAll("path").style("stroke-width", 1.5 / d3.event.transform.k + "px")
             .attr("transform", d3.event.transform);
         svg.selectAll('circle').attr('r', stationRadius/d3.event.transform.k)
@@ -268,13 +270,18 @@ d3.json("data/json/map.json", function (json) {
                 .attr("xlink:href", "data/fb-logo.png");
 
             events.attr('x', function (e) {
-                return projection([e.place.location.longitude, e.place.location.latitude])[0]
+                return projection([e.place.location.longitude, e.place.location.latitude])[0];
             })
                 .attr('y', function (e) {
-                    return projection([e.place.location.longitude, e.place.location.latitude])[1]
+                    return projection([e.place.location.longitude, e.place.location.latitude])[1];
                 })
-                .attr('height', eventHeight)
-                .attr('width', eventWidth)
+                .attr('transform', transform)
+                .attr('height', function () {
+                    return transform ? eventHeight/transform.k : eventHeight
+                })
+                .attr('width', function () {
+                    return transform ? eventWidth/transform.k : eventWidth
+                })
                 .style('fill', '#3b5998')
                 .on('click', function (d) {
                     d3.select('#event-info').style('visibility', 'visible');
@@ -285,6 +292,16 @@ d3.json("data/json/map.json", function (json) {
             checkFetchState();
         })
     }
+
+    // function fetchVelov(timestamp) {
+    //     timeSlider.attr('disbaled', false);
+    //     sliderLoader.classed('hide', false);
+    //     velovFetchState = false;
+    //     const url = "http://creti.fr/gbgh/endpoints/events.php?from=" + timestamp + '&until=';
+    //     d3.json(url, function (err, data) {
+    //         console.log(data)
+    //     })
+    // }
 
     function checkFetchState() {
         if (eventfetchState && velovFetchState) {
