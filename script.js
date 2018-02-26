@@ -44,7 +44,6 @@ d3.json("data/json/map.json", function (json) {
                 + date.getFullYear() + ' - '
                 + (date.getHours() < 10 ? '0' : '') + date.getHours() + 'h'
                 + (date.getMinutes() < 10 ? '0' : '') + date.getMinutes());
-            // fetchEvents(+this.value);
         })
         .on('change', function() {
           fetchEvents(+this.value);
