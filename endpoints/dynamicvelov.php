@@ -1,7 +1,24 @@
 <?php
 header('Access-Control-Allow-Origin: *');
 include 'apisecret.php';
-
+if (isset($_GET["describe"])) {
+  $json1 = file_get_contents(
+    "https://api.mlab.com/api/1/databases/gbgh/collections/dynamicVelov".
+    "?apiKey=".$key.
+    "&s=".urlencode("{timestamp : 1}").
+    "&f=".urlencode("{'_id':0, 'stations': 0}").
+    "&l=1"
+  );
+  $json2 = file_get_contents(
+    "https://api.mlab.com/api/1/databases/gbgh/collections/dynamicVelov".
+    "?apiKey=".$key.
+    "&s=".urlencode("{timestamp : -1}").
+    "&f=".urlencode("{'_id':0, 'stations' : 0}").
+    "&l=1"
+  );
+  echo "{ 'min' : $json1, 'max' : $json2}";
+  exit;
+}
 if( !isset($_GET["from"]) || !isset($_GET["until"]) ) {
   echo("{ 'error' : 'request needs \"from\" and \"until\" arguments, encoded in unix timestamp. There may be a \"delta\" argument, in minutes, which describes the delta time before and after the given timestamp.' }");
   exit;
