@@ -23,25 +23,35 @@
                     </div>
                     <div class="col-12" id="event-info">
                         <p>
-                            Nom :
+                            Name :
                             <span id="eventName"></span>
                         </p>
                         <p>
-                            Lieu :
+                            Place :
                             <span id="eventPlace"></span>
                         </p>
                         <p>
-                            Date de début :
+                            Start time :
                             <span id="eventStartTime"></span>
                         </p>
                         <p>
-                            Date de fin :
+                            End time :
                             <span id="eventEndTime"></span>
                         </p>
                     </div>
-                    <div class="col-12" id="time-slider">
-                        <!--<input type="range" min="1" max="1000" value="200">-->
+                    <div class="col-12" style="color: white; margin-top: 20px;margin-bottom: 20px;">
+                        Selected date :
+                        <span id="current-date"></span>
                     </div>
+                    <div class="col-2"></div>
+                    <div class="col-9" id="time-slider-container">
+                        <input id='time-slider' type="range" min="1" max="1000" value="200">
+                    </div>
+                    <!--<div class="d-flex justify-content-center col-1" id="slider-loader-container">-->
+                        <div class="col-1">
+                            <div id="slider-loader"></div>
+                        </div>
+                    <!--</div>-->
                 </div>
             </div>
         </div>

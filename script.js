@@ -22,9 +22,29 @@ d3.json("data/json/map.json", function (json) {
         tooltipDuration = 250,
         stationRadius = 8,
         eventHeight = 30,
-        eventWidth = 30;
+        eventWidth = 30,
+        beginDate = 1519208881,
+        endDate = 1519645081,
+        eventfetchState = false,
+        velovFetchState = true,
+        timeSlider = d3.select('#time-slider'),
+        sliderLoader = d3.select('#slider-loader');
 
     d3.select("#map").attr('height', height);
+
+    timeSlider.attr('min', beginDate)
+        .attr('max', endDate)
+        .attr('value', beginDate)
+        .attr('step', 300)
+        .on('change', function () {
+            const date = new Date(+this.value * 1000);
+            d3.select('#current-date').html(date.getDate() + '/'
+                + (date.getMonth() < 9 ? '0' : '') + (date.getMonth() + 1) + '/'
+                + date.getFullYear() + ' - '
+                + (date.getHours() < 10 ? '0' : '') + date.getHours() + 'h'
+                + (date.getMinutes() < 10 ? '0' : '') + date.getMinutes());
+            fetchEvents(+this.value);
+        });
 
     var tooltip = d3.select('body').append('div').classed('hide', true).classed('station-tooltip', true);
 
@@ -65,12 +85,12 @@ d3.json("data/json/map.json", function (json) {
                     return projection(d.geometry.coordinates)[1];
                 });
 
-            // events.attr('x', function (e) {
-            //     return projection([e.place.location.longitude, e.place.location.latitude])[0]
-            // })
-            //     .attr('y', function (e) {
-            //         return projection([e.place.location.longitude, e.place.location.latitude])[1]
-            //     })
+            events.attr('x', function (e) {
+                return projection([e.place.location.longitude, e.place.location.latitude])[0]
+            })
+                .attr('y', function (e) {
+                    return projection([e.place.location.longitude, e.place.location.latitude])[1]
+                })
 
         }
     }
@@ -136,6 +156,14 @@ d3.json("data/json/map.json", function (json) {
     }
 
     function init() {
+
+        const date = new Date(+beginDate * 1000);
+
+        d3.select('#current-date').html(date.getDate() + '/'
+            + (date.getMonth() < 9 ? '0' : '') + (date.getMonth() + 1) + '/'
+            + date.getFullYear() + ' - '
+            + (date.getHours() < 10 ? '0' : '') + date.getHours() + 'h'
+            + (date.getMinutes() < 10 ? '0' : '') + date.getMinutes());
         
 
         d3.json("http://creti.fr/gbgh/endpoints/staticvelov.php", function (err, data) {
@@ -169,11 +197,7 @@ d3.json("data/json/map.json", function (json) {
                     tooltip.classed('hide', true);
                 });
 
-            fetchEvents(new Date("2018-02-20T20:00:00+0100"))
-
-            setTimeout(function () {
-                fetchEvents(new Date("2018-02-21T20:00:00+0100"))
-            }, 5000)
+            fetchEvents(beginDate);
 
             resize();
 
@@ -227,8 +251,10 @@ d3.json("data/json/map.json", function (json) {
         d3.select('#eventEndTime').html(formatEnd);
     }
 
-    function fetchEvents(date) {
-        const timestamp = Math.floor(new Date(date).getTime() / 1000);
+    function fetchEvents(timestamp) {
+        timeSlider.attr('disabled', false);
+        sliderLoader.classed('hide', false);
+        eventfetchState = false;
         const url = "http://creti.fr/gbgh/endpoints/events.php?timestamp=" + timestamp;
         d3.json(url, function (err, data) {
             events.remove();
@@ -248,10 +274,22 @@ d3.json("data/json/map.json", function (json) {
                 .attr('width', eventWidth)
                 .style('fill', '#3b5998')
                 .on('click', function (d) {
+                    d3.select('#event-info').style('visibility', 'visible');
                     showEventInfo(d);
                 });
+
+            eventfetchState = true;
+            checkFetchState();
         })
     }
+
+    function checkFetchState() {
+        if (eventfetchState && velovFetchState) {
+            timeSlider.attr('disabled', null);
+            sliderLoader.classed('hide', true);
+        }
+    }
+
 
     // fetchEvents(new Date("2018-02-20T20:00:00+0100"))
 
