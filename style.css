@@ -80,6 +80,10 @@ path {
     fill: grey;
 }
 
+.bike-info {
+    font-style: italic;
+}
+
 .station-tooltip {
     background-color: #424242;
     color: white;
