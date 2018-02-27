@@ -34,7 +34,8 @@ d3.json("data/json/map.json", function (json) {
         timestampStored = [],
         velovData = [],
         step = 120,
-        currentTimestamp;
+        currentTimestamp,
+        fbPath = 'M211.9 197.4h-36.7v59.9h36.7V433.1h70.5V256.5h49.2l5.2-59.1h-54.4c0 0 0-22.1 0-33.7 0-13.9 2.8-19.5 16.3-19.5 10.9 0 38.2 0 38.2 0V82.9c0 0-40.2 0-48.8 0 -52.5 0-76.1 23.1-76.1 67.3C211.9 188.8 211.9 197.4 211.9 197.4z';
 
     d3.select("#map").attr('height', height);
 
@@ -71,39 +72,6 @@ d3.json("data/json/map.json", function (json) {
         });
 
     init();
-
-    d3.select(window).on('resize', resize);
-
-    function resize() {
-        if (parseInt(d3.select('#map').style('width')) !== width) {
-            width = parseInt(d3.select('#map').style('width'));
-            height = width / ratio;
-            d3.select("#map").attr('height', height);
-
-            var scale = (width / (bounds[1][0] - bounds[0][0])) * initScale;
-
-            projection
-                .translate([width / 2, height / 2])
-                .scale(scale);
-
-            d3.selectAll("path").attr("d", path);
-
-            stations.attr('cx', function (d) {
-                return projection(d.geometry.coordinates)[0];
-            })
-                .attr('cy', function (d) {
-                    return projection(d.geometry.coordinates)[1];
-                });
-
-            svg.selectAll('image').attr('x', function (e) {
-                return projection([e.place.location.longitude, e.place.location.latitude])[0]
-            })
-                .attr('y', function (e) {
-                    return projection([e.place.location.longitude, e.place.location.latitude])[1]
-                })
-
-        }
-    }
 
     // Fill zone
     d3.selectAll("path")
@@ -157,19 +125,20 @@ d3.json("data/json/map.json", function (json) {
 
     function zoomed() {
         transform = d3.event.transform;
-        svg.selectAll("path").style("stroke-width", 1.5 / d3.event.transform.k + "px")
+        svg.selectAll(".region").style("stroke-width", 1.5 / d3.event.transform.k + "px")
             .attr("transform", d3.event.transform);
         svg.selectAll('circle').attr('r', function (d) {
             return getRadius(d.available_bikes, d.available_bike_stands, d3.event.transform);
         })
             .attr('transform', d3.event.transform);
-        svg.selectAll('image').attr('transform', d3.event.transform)
-            .attr('height', function (d) {
-                return getEventSize(d.startTime, d.endTime, currentTimestamp, transform)[0];
-            })
-            .attr('width', function (d) {
-                return getEventSize(d.startTime, d.endTime, currentTimestamp, transform)[1];
-            });
+        // svg.selectAll('image').attr('transform', d3.event.transform)
+        //     .attr('height', function (d) {
+        //         return getEventSize(d.startTime, d.endTime, currentTimestamp, transform)[0];
+        //     })
+        //     .attr('width', function (d) {
+        //         return getEventSize(d.startTime, d.endTime, currentTimestamp, transform)[1];
+        //     });
+        svg.selectAll('.event').attr('transform', d3.event.transform)
     }
 
     function init() {
@@ -206,9 +175,7 @@ d3.json("data/json/map.json", function (json) {
                 .attr('name', function (d) {
                     return d.nom;
                 })
-                .attr('r', function (d) {
-                    // d.available_bikes = 1;
-                    // d.available_bike_stands = 0;
+                .attr('r', function () {
                     return getRadius(1, 0, transform);
                 })
                 .style('opacity', 0)
@@ -230,8 +197,6 @@ d3.json("data/json/map.json", function (json) {
             fetchEvents(beginDate);
 
             fetchVelov(beginDate);
-
-            resize();
 
             d3.select('#loader-container')
                 .transition()
@@ -292,6 +257,9 @@ d3.json("data/json/map.json", function (json) {
         d3.json(url, function (err, data) {
             var events = svg.selectAll('image')
                 .data(data)
+                .attr("xlink:href", function (d) {
+                    return "data/fb-logo-" + getColor(d.startTime, d.endTime, currentTimestamp) + ".png"
+                })
                 .attr('x', function (e) {
                     return projection([e.place.location.longitude, e.place.location.latitude])[0];
                 })
@@ -307,35 +275,37 @@ d3.json("data/json/map.json", function (json) {
                     // return transform ? eventWidth/transform.k : eventWidth
                     return getEventSize(d.startTime, d.endTime, timestamp, transform)[1];
                 })
-                .style('fill', '#3b5998')
+                // .style('fill', '#3b5998')
                 .on('click', function (d) {
                     d3.select('#event-info').style('visibility', 'visible');
                     showEventInfo(d);
                 });
 
-                events.enter()
-                    .append('svg:image')
-                    .attr("xlink:href", "data/fb-logo.png")
-                    .attr('x', function (e) {
-                        return projection([e.place.location.longitude, e.place.location.latitude])[0];
-                    })
-                    .attr('y', function (e) {
-                        return projection([e.place.location.longitude, e.place.location.latitude])[1];
-                    })
-                    .attr('transform', transform)
-                    .attr('height', function (d) {
-                        // return transform ? eventHeight/transform.k : eventHeight
-                        return getEventSize(d.startTime, d.endTime, timestamp, transform)[0];
-                    })
-                    .attr('width', function (d) {
-                        // return transform ? eventWidth/transform.k : eventWidth
-                        return getEventSize(d.startTime, d.endTime, timestamp, transform)[1];
-                    })
-                    .style('fill', '#3b5998')
-                    .on('click', function (d) {
-                        d3.select('#event-info').style('visibility', 'visible');
-                        showEventInfo(d);
-                    });
+            events.enter()
+                .append('svg:image')
+                .attr("xlink:href", function (d) {
+                    return "data/fb-logo-" + getColor(d.startTime, d.endTime, currentTimestamp) + ".png"
+                })
+                .attr('x', function (e) {
+                    return projection([e.place.location.longitude, e.place.location.latitude])[0];
+                })
+                .attr('y', function (e) {
+                    return projection([e.place.location.longitude, e.place.location.latitude])[1];
+                })
+                .attr('transform', transform)
+                .attr('height', function (d) {
+                    // return transform ? eventHeight/transform.k : eventHeight
+                    return getEventSize(d.startTime, d.endTime, timestamp, transform)[0];
+                })
+                .attr('width', function (d) {
+                    // return transform ? eventWidth/transform.k : eventWidth
+                    return getEventSize(d.startTime, d.endTime, timestamp, transform)[1];
+                })
+                // .style('fill', '#3b5998')
+                .on('click', function (d) {
+                    d3.select('#event-info').style('visibility', 'visible');
+                    showEventInfo(d);
+                });
 
                 events.exit().remove();
 
@@ -405,6 +375,7 @@ d3.json("data/json/map.json", function (json) {
             .attr("stop-color", "rgba(255,255,255,0.2)");
 
         svg.selectAll('circle').data(updatedData.stations)
+            .transition().duration(velovDuration)
             .style("fill", "url(#radial-gradient)")
             .attr('r', function (d) {
                 return getRadius(d.available_bikes, d.available_bike_stands, transform);
@@ -440,11 +411,25 @@ d3.json("data/json/map.json", function (json) {
         const endTime = Math.floor(new Date(endDate).getTime()/1000);
         if(timestamp <= startTime) {
             factor = 1.5*(timestamp-startTime+8200)/8200/(transform ? transform.k : 1);
-        } else {
+        } else if(timestamp <= endTime) {
             factor = 1.5*(timestamp-startTime)/(endTime-startTime)/(transform ? transform.k : 1);
+        } else {
+            factor = 1.5*(8200-timestamp+endTime)/8200/(transform ? transform.k : 1);
         }
         const height = Math.round(parseInt((eventHeight*factor).toString()));
         const width = Math.round(parseInt((eventWidth*factor).toString()));
         return [height, width];
+    }
+
+    function getColor(startDate, endDate, timestamp) {
+        const startTime = Math.floor(new Date(startDate).getTime()/1000);
+        const endTime = Math.floor(new Date(endDate).getTime()/1000);
+        if(timestamp <= startTime) {
+            return 'green';
+        } else if(timestamp <= endTime) {
+            return 'orange';
+        } else {
+            return 'red';
+        }
     }
 });
