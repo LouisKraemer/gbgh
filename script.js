@@ -33,7 +33,8 @@ d3.json("data/json/map.json", function (json) {
         transform = null,
         timestampStored = [],
         velovData = [],
-        step = 120;
+        step = 120,
+        currentTimestamp;
 
     d3.select("#map").attr('height', height);
 
@@ -50,8 +51,9 @@ d3.json("data/json/map.json", function (json) {
                 + (date.getMinutes() < 10 ? '0' : '') + date.getMinutes());
         })
         .on('change', function() {
-          fetchEvents(+this.value);
-          fetchVelov(+this.value);
+            currentTimestamp = +this.value;
+            fetchEvents(+this.value);
+            fetchVelov(+this.value);
         });
 
     var tooltip = d3.select('body').append('div').classed('hide', true).classed('station-tooltip', true);
@@ -162,13 +164,19 @@ d3.json("data/json/map.json", function (json) {
         })
             .attr('transform', d3.event.transform);
         svg.selectAll('image').attr('transform', d3.event.transform)
-            .attr('height', eventHeight/d3.event.transform.k)
-            .attr('width', eventWidth/d3.event.transform.k);
+            .attr('height', function (d) {
+                return getEventSize(d.startTime, d.endTime, currentTimestamp, transform)[0];
+            })
+            .attr('width', function (d) {
+                return getEventSize(d.startTime, d.endTime, currentTimestamp, transform)[1];
+            });
     }
 
     function init() {
 
         const date = new Date(+beginDate * 1000);
+
+        currentTimestamp = +beginDate;
 
         d3.select('#current-date').html(date.getDate() + '/'
             + (date.getMonth() < 9 ? '0' : '') + (date.getMonth() + 1) + '/'
@@ -291,18 +299,19 @@ d3.json("data/json/map.json", function (json) {
                     return projection([e.place.location.longitude, e.place.location.latitude])[1];
                 })
                 .attr('transform', transform)
-                .attr('height', function () {
-                    return transform ? eventHeight/transform.k : eventHeight
+                .attr('height', function (d) {
+                    // return transform ? eventHeight/transform.k : eventHeight
+                    return getEventSize(d.startTime, d.endTime, timestamp, transform)[0];
                 })
-                .attr('width', function () {
-                    return transform ? eventWidth/transform.k : eventWidth
+                .attr('width', function (d) {
+                    // return transform ? eventWidth/transform.k : eventWidth
+                    return getEventSize(d.startTime, d.endTime, timestamp, transform)[1];
                 })
                 .style('fill', '#3b5998')
                 .on('click', function (d) {
                     d3.select('#event-info').style('visibility', 'visible');
                     showEventInfo(d);
                 });
-                // .enter()
 
                 events.enter()
                     .append('svg:image')
@@ -314,11 +323,13 @@ d3.json("data/json/map.json", function (json) {
                         return projection([e.place.location.longitude, e.place.location.latitude])[1];
                     })
                     .attr('transform', transform)
-                    .attr('height', function () {
-                        return transform ? eventHeight/transform.k : eventHeight
+                    .attr('height', function (d) {
+                        // return transform ? eventHeight/transform.k : eventHeight
+                        return getEventSize(d.startTime, d.endTime, timestamp, transform)[0];
                     })
-                    .attr('width', function () {
-                        return transform ? eventWidth/transform.k : eventWidth
+                    .attr('width', function (d) {
+                        // return transform ? eventWidth/transform.k : eventWidth
+                        return getEventSize(d.startTime, d.endTime, timestamp, transform)[1];
                     })
                     .style('fill', '#3b5998')
                     .on('click', function (d) {
@@ -398,33 +409,6 @@ d3.json("data/json/map.json", function (json) {
             .attr('r', function (d) {
                 return getRadius(d.available_bikes, d.available_bike_stands, transform);
             })
-
-
-
-
-        // updatedData.stations.forEach(function (station) {
-        //     if(station.available_bike_stands === 0 && station.available_bikes === 0) {
-        //         d3.select('#station_' + station.idstation)
-        //             .classed('no-data', true);
-        //     } else {
-        //         d3.select('#station_' + station.idstation)
-        //             .classed('no-data', function () {
-        //                 return station.available_bike_stands === 0 && station.available_bikes === 0
-        //             })
-        //             .attr('r', function (d) {
-        //                 if (station.available_bike_stands === 0 && station.available_bikes === 0) {
-        //                     d.available_bikes = station.available_bikes;
-        //                     d.available_bike_stands = station.available_bike_stands;
-        //                     return transform ?
-        //                         parseInt(stationRadius*(d.available_bikes/d.available_bike_stands+d.available_bikes)/transform.k) :
-        //                         parseInt(stationRadius*(d.available_bikes/d.available_bike_stands+d.available_bikes));
-        //                 } else {
-        //                     return transform ? parseInt(stationRadius/transform.k) : stationRadius;
-        //                 }
-        //             })
-        //     }
-        // })
-
     }
 
     function getVelovData(index) {
@@ -450,7 +434,17 @@ d3.json("data/json/map.json", function (json) {
         }
     }
 
-    // fetchEvents(new Date("2018-02-20T20:00:00+0100"))
-
-    // Slider config
+    function getEventSize(startDate, endDate, timestamp, transform) {
+        var factor = 1;
+        const startTime = Math.floor(new Date(startDate).getTime()/1000);
+        const endTime = Math.floor(new Date(endDate).getTime()/1000);
+        if(timestamp <= startTime) {
+            factor = 1.5*(timestamp-startTime+8200)/8200/(transform ? transform.k : 1);
+        } else {
+            factor = 1.5*(timestamp-startTime)/(endTime-startTime)/(transform ? transform.k : 1);
+        }
+        const height = Math.round(parseInt((eventHeight*factor).toString()));
+        const width = Math.round(parseInt((eventWidth*factor).toString()));
+        return [height, width];
+    }
 });
