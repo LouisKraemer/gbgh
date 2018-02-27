@@ -412,7 +412,7 @@ d3.json("data/json/map.json", function (json) {
         if(available_bikes === 0 && available_bike_stands === 0) {
             return 0;
         } else {
-            return parseInt((20*available_bikes/(available_bike_stands+available_bikes)/(transform ? transform.k : 1)).toString())
+            return parseInt((20*(1+available_bikes)/(available_bike_stands+available_bikes)/(transform ? transform.k : 1)).toString())
         }
     }
 
