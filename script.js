@@ -213,7 +213,7 @@ d3.json("data/json/map.json", function (json) {
                     tooltip.html(d3.select(this).attr('name') + '</br><span class="bike-info">Available bikes : </span>' + d.available_bikes
                     + '</br><span class="bike-info">Available stands : </span>' + d.available_bike_stands)
                         .classed('hide', false)
-                        .attr('style', 'left:' + (mouse[0] + 45) + 'px; top:' + (mouse[1] - 25) + 'px');
+                        .attr('style', 'left:' + (mouse[0] + 45) + 'px; top:' + (mouse[1] - 55) + 'px');
                 })
                 .on('mouseleave', function () {
                     tooltip.classed('hide', true);
