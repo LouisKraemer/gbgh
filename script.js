@@ -16,7 +16,7 @@ d3.json("data/json/map.json", function (json) {
         ratio = (bounds[1][0] - bounds[0][0]) / (bounds[1][1] - bounds[0][1]),
         height = width / ratio,
         stations,
-        events = d3.select(null),
+        // events = d3.select(null),
         duration = 750,
         velovDuration = 250,
         tooltipDuration = 250,
@@ -93,7 +93,7 @@ d3.json("data/json/map.json", function (json) {
                     return projection(d.geometry.coordinates)[1];
                 });
 
-            events.attr('x', function (e) {
+            svg.selectAll('image').attr('x', function (e) {
                 return projection([e.place.location.longitude, e.place.location.latitude])[0]
             })
                 .attr('y', function (e) {
@@ -282,16 +282,11 @@ d3.json("data/json/map.json", function (json) {
         eventfetchState = false;
         const url = "http://creti.fr/gbgh/endpoints/events.php?timestamp=" + timestamp;
         d3.json(url, function (err, data) {
-            events.remove();
-            events = svg.selectAll('image')
+            var events = svg.selectAll('image')
                 .data(data)
-                .enter()
-                .append('svg:image')
-                .attr("xlink:href", "data/fb-logo.png");
-
-            events.attr('x', function (e) {
-                return projection([e.place.location.longitude, e.place.location.latitude])[0];
-            })
+                .attr('x', function (e) {
+                    return projection([e.place.location.longitude, e.place.location.latitude])[0];
+                })
                 .attr('y', function (e) {
                     return projection([e.place.location.longitude, e.place.location.latitude])[1];
                 })
@@ -307,6 +302,31 @@ d3.json("data/json/map.json", function (json) {
                     d3.select('#event-info').style('visibility', 'visible');
                     showEventInfo(d);
                 });
+                // .enter()
+
+                events.enter()
+                    .append('svg:image')
+                    .attr("xlink:href", "data/fb-logo.png")
+                    .attr('x', function (e) {
+                        return projection([e.place.location.longitude, e.place.location.latitude])[0];
+                    })
+                    .attr('y', function (e) {
+                        return projection([e.place.location.longitude, e.place.location.latitude])[1];
+                    })
+                    .attr('transform', transform)
+                    .attr('height', function () {
+                        return transform ? eventHeight/transform.k : eventHeight
+                    })
+                    .attr('width', function () {
+                        return transform ? eventWidth/transform.k : eventWidth
+                    })
+                    .style('fill', '#3b5998')
+                    .on('click', function (d) {
+                        d3.select('#event-info').style('visibility', 'visible');
+                        showEventInfo(d);
+                    });
+
+                events.exit().remove();
 
             eventfetchState = true;
             checkFetchState();
