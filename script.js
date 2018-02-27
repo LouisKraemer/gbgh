@@ -280,7 +280,7 @@ d3.json("data/json/map.json", function (json) {
         timeSlider.attr('disabled', true);
         sliderLoader.classed('hide', false);
         eventfetchState = false;
-        const url = "http://creti.fr/gbgh/endpoints/events.php?timestamp=" + timestamp;
+        const url = "http://creti.fr/gbgh/endpoints/events.php?timestamp=" + timestamp + "&delta=120";
         d3.json(url, function (err, data) {
             var events = svg.selectAll('image')
                 .data(data)
