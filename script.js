@@ -381,7 +381,20 @@ d3.json("data/json/map.json", function (json) {
         const index = findTimestamp(timestamp);
         const updatedData = getVelovData(index);
 
+        var radialGradient = svg.append("defs")
+          .append("radialGradient")
+            .attr("id", "radial-gradient");
+
+        radialGradient.append("stop")
+            .attr("offset", "10%")
+            .attr("stop-color", "orange");
+
+        radialGradient.append("stop")
+            .attr("offset", "100%")
+            .attr("stop-color", "rgba(255,255,255,0.2)");
+
         svg.selectAll('circle').data(updatedData.stations)
+            .style("fill", "url(#radial-gradient)")
             .attr('r', function (d) {
                 return getRadius(d.available_bikes, d.available_bike_stands, transform);
             })
