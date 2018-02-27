@@ -12,11 +12,19 @@ else {
     exit;
   }
   else {
-    $date = date('Y-m-d\TH:i:sO', intval($_GET["timestamp"]));
+    if (isset($_GET["delta"]) && is_numeric($_GET["delta"])) {
+      $from = date('Y-m-d\TH:i:sO', intval($_GET["timestamp"]) + 60 * intval($_GET["delta"]));
+      $until = date('Y-m-d\TH:i:sO', intval($_GET["timestamp"]) - 60 * intval($_GET["delta"]));
+    }
+    else {
+      $from = date('Y-m-d\TH:i:sO', intval($_GET["timestamp"]));
+      $until = date('Y-m-d\TH:i:sO', intval($_GET["timestamp"]));
+    }
+    // $date = date('Y-m-d\TH:i:sO', intval($_GET["timestamp"]));
     $json = file_get_contents(
       "https://api.mlab.com/api/1/databases/gbgh/collections/events".
       "?apiKey=".$key.
-      "&q=".urlencode("{startTime : {\$lt : \"$date\"}, endTime : {\$gt : \"$date\"}}").
+      "&q=".urlencode("{startTime : {\$lt : \"$from\"}, endTime : {\$gt : \"$until\"}}").
       "&f=".urlencode("{'_id':0}")
     );
     echo($json);
