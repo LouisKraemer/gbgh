@@ -289,7 +289,8 @@ d3.json("data/json/map.json", function (json) {
                 });
 
             events.enter()
-                .append('svg:image')
+                .insert('svg:image','circle')
+                .classed('event', true)
                 .attr("xlink:href", function (d) {
                     return "data/fb-logo-" + getColor(d.startTime, d.endTime, currentTimestamp) + ".png"
                 })
@@ -438,6 +439,13 @@ d3.json("data/json/map.json", function (json) {
             return 'orange';
         } else {
             return 'red';
+        }
+    }
+
+    function moveToBack(element) {
+        if(d3.selectAll('circle')) {
+            const firstChild = d3.selectAll('circle').nodes()[0];
+            console.log(firstChild);
         }
     }
 });
