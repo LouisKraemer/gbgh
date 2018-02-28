@@ -16,7 +16,7 @@ if (isset($_GET["describe"])) {
     "&f=".urlencode("{'_id':0, 'stations' : 0}").
     "&l=1"
   );
-  echo "{ 'min' : $json1, 'max' : $json2}";
+  echo "{ \"min\" : $json1, \"max\" : $json2}";
   exit;
 }
 if( !isset($_GET["from"]) || !isset($_GET["until"]) ) {

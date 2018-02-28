@@ -1,5 +1,13 @@
 d3.json("data/json/map.json", function (json) {
 
+    var request = new XMLHttpRequest();
+    request.open('GET', 'http://creti.fr/gbgh/endpoints/dynamicvelov.php?describe', false);  // `false` makes the request synchronous
+    request.send(null);
+    if (request.status === 200) {
+      console.log(request.responseText);
+      limitDates = JSON.parse(request.responseText);
+    }
+
     var svg = d3.select("#map-container")
         .append("svg")
         .attr('id', 'map')
@@ -23,8 +31,8 @@ d3.json("data/json/map.json", function (json) {
         stationRadius = 8,
         eventHeight = 30,
         eventWidth = 30,
-        beginDate = 1519208881,
-        endDate = 1519645081,
+        beginDate = limitDates['min'][0]['timestamp'],
+        endDate = limitDates['max'][0]['timestamp'],
         eventfetchState = false,
         velovFetchState = false,
         initFetchState = false,
