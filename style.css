@@ -104,3 +104,19 @@ path {
 #time-slider {
     width: 100%;
 }
+
+.title {
+  text-align: center;
+  font-size: 18px;
+  font-weight: bold;
+  color: white;
+  padding: 20px;
+}
+
+.text {
+  color:white;
+  font-size: 12px;
+}
+.text p {
+  margin-bottom : 5px;
+}

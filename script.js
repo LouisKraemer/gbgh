@@ -4,7 +4,6 @@ d3.json("data/json/map.json", function (json) {
     request.open('GET', 'http://creti.fr/gbgh/endpoints/dynamicvelov.php?describe', false);  // `false` makes the request synchronous
     request.send(null);
     if (request.status === 200) {
-      console.log(request.responseText);
       limitDates = JSON.parse(request.responseText);
     }
 
@@ -139,13 +138,13 @@ d3.json("data/json/map.json", function (json) {
             return getRadius(d.available_bikes, d.available_bike_stands, d3.event.transform);
         })
             .attr('transform', d3.event.transform);
-        // svg.selectAll('image').attr('transform', d3.event.transform)
-        //     .attr('height', function (d) {
-        //         return getEventSize(d.startTime, d.endTime, currentTimestamp, transform)[0];
-        //     })
-        //     .attr('width', function (d) {
-        //         return getEventSize(d.startTime, d.endTime, currentTimestamp, transform)[1];
-        //     });
+        svg.selectAll('image').attr('transform', d3.event.transform)
+            .attr('height', function (d) {
+                return getEventSize(d.startTime, d.endTime, currentTimestamp, transform)[0];
+            })
+            .attr('width', function (d) {
+                return getEventSize(d.startTime, d.endTime, currentTimestamp, transform)[1];
+            });
         svg.selectAll('.event').attr('transform', d3.event.transform)
     }
 
@@ -414,13 +413,14 @@ d3.json("data/json/map.json", function (json) {
     }
 
     function getEventSize(startDate, endDate, timestamp, transform) {
+      var polynome = x => {return 3*(x*x - x) + 1}
         var factor = 1;
         const startTime = Math.floor(new Date(startDate).getTime()/1000);
         const endTime = Math.floor(new Date(endDate).getTime()/1000);
         if(timestamp <= startTime) {
             factor = 1.5*(timestamp-startTime+8200)/8200/(transform ? transform.k : 1);
         } else if(timestamp <= endTime) {
-            factor = 1.5*(timestamp-startTime)/(endTime-startTime)/(transform ? transform.k : 1);
+            factor = 1.5*(polynome((timestamp-startTime)/(endTime-startTime)))/(transform ? transform.k : 1);
         } else {
             factor = 1.5*(8200-timestamp+endTime)/8200/(transform ? transform.k : 1);
         }
