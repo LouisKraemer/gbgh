@@ -1,0 +1,10 @@
+Présentation : 7minutes
+Début : 
+#On présente les motivations derrière l'appli. (30 secondes)
+# On présente la demo de l'appli. (2 minutes)
+# On présente les résultats par rapports a nos motivations ( 1 minute)
+# On présente les entrailles du front (30 secondes)
+# On présente les entrailles du back (30 secondes) 
+# Nos points d'amelioration : Bouton play, Cache dans le front, Lazy load, Rajouter des éléments géographiques, Design responsive, Rendre l'application utilisable partout (reste)
+
+Questions : 5 minutes
