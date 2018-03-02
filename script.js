@@ -382,12 +382,17 @@ d3.json("data/json/map.json", function (json) {
             .attr("offset", "100%")
             .attr("stop-color", "rgba(255,255,255,0.2)");
 
-        svg.selectAll('circle').data(updatedData.stations)
-            .transition().duration(velovDuration)
-            .style("fill", "url(#radial-gradient)")
-            .attr('r', function (d) {
-                return getRadius(d.available_bikes, d.available_bike_stands, transform);
-            })
+        updatedData.stations.forEach(function (value) {
+            svg.select('#station_' + value.idstation)
+                .transition().duration(velovDuration)
+                .style("fill", "url(#radial-gradient)")
+                .attr('r', function (d) {
+                    d.available_bikes = value.available_bikes;
+                    d.available_bike_stands = value.available_bike_stands;
+                    return getRadius(d.available_bikes, d.available_bike_stands, transform);
+                })
+        })
+
     }
 
     function getVelovData(index) {
