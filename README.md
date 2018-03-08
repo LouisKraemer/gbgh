@@ -42,6 +42,27 @@ Here is a schema synthetizing all of these interactions :
 
 ### In the front
 
+First, we request two sets of data. The first gives us all the informations about the velov stations and their location so we can place them on the map. The second one concern the facebook events taking place during the the present moment.
+After the initial load, the user can do one of two things : 
+- We can click on a district to zoom in and see precisely which stations and which event are nearby. For that, we use d3 zoom ability.
+- We can select a different date. For a selected date, the front will request stations data for the next 30 minutes and store them allowing a more fluid navigation.  
+
+#### Facebook logo
+
+Each logo can be of three different color :
+- Green : the event will happen in the next two hours or less
+- Orange : the event is happening
+- Red : the event ended less than two hours ago
+The size get its greatest size when the event is near the begining or the end.
+
+#### Stations
+
+Each stations is represented by a circle. When hovering a circle we get three informations :
+- The name of the station
+- The number of available bikes
+- The number of available bike stands
+The size represents the ratio of available bikes over the maximum capacity giving us a simple visualization.
+
 ## How to
 
 Afin de profiter de nos recherches, il faut tout d'abord installer les packages à l'aide la commande "npm install". Par la suite il suffit d'ouvrir index.html.
