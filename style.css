@@ -120,3 +120,7 @@ path {
 .text p {
   margin-bottom : 5px;
 }
+
+.event:hover {
+    cursor: pointer;
+}
