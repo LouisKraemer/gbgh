@@ -38,7 +38,7 @@ Since all of the data is in the JSON format, we decided to stock it in a mongoDB
 Once the MongoDB database has data, a second machine (called PHPHost) fetches the data from the Mlab database and serves it, with the frontend javascript application, via PHP to the frontend user.
 
 Here is a schema synthetizing all of these interactions : 
-![Backend Schema](#link)
+![alt text](docs/ssets/schema.jpg "Backend Schema")
 
 ### In the front
 
