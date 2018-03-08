@@ -63,19 +63,24 @@ Each stations is represented by a circle. When hovering a circle we get three in
 - The number of available bike stands
 The size represents the ratio of available bikes over the maximum capacity giving us a simple visualization.
 
+### Tutorial
+You can find a video tutorial in the link below.  
+
+[![IMAGE ALT TEXT](http://img.youtube.com/vi/mXiUym4fBaU/0.jpg)](http://www.youtube.com/watch?v=mXiUym4fBaU "Go Bike Or Go Home")
+
 ## How to
 
-In order to install and serve the website, the user needs to install all npm packages by running inside the root of the repository
+In order to install and serve the website, the user needs to install all npm packages by running inside the root of the repository  
 '''
 npm install
-'''
-Once the command is done, the user needs to start the facebook events server API by using the command
+'''  
+Once the command is done, the user needs to start the facebook events server API by using the command  
 '''
 /backend/start.sh
-'''
-After running the server, getEvent.py and getVelov.py allows us to inject the wanted data in a mongoDB database which the users need to adapt (his own database in mlab).
+'''  
+After running the server, getEvent.py and getVelov.py allows us to inject the wanted data in a mongoDB database which the users need to adapt (his own database in mlab).  
 
-Once the script are running at the desired frequency (crontab can easily do that) and loading the desired database, the user can serve the site with Apache while making sure that the file in the directory '/endpoints' points to the right mlab database.
+Once the script are running at the desired frequency (crontab can easily do that) and loading the desired database, the user can serve the site with Apache while making sure that the file in the directory '/endpoints' points to the right mlab database.  
 
 ## Authors
 
